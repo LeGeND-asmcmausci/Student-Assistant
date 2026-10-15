@@ -11,6 +11,7 @@ export const MODULES = [
   { id: 'planner', label: "O'quv jadvali", full: 'O‘quv Jadvali va To-Do Tracker' },
   { id: 'gpa', label: 'GPA kalkulyator', full: 'Akademik GPA Kalkulyatori' },
   { id: 'formulas', label: 'Formulalar', full: 'Formulalar Ma’lumotnomasi' },
+  { id: 'humanizer', label: 'AI Humanizer', full: 'AI Text Humanizer — matnni tabiiylashtirish', num: '10' },
 ];
 
 export default function Header() {
@@ -142,7 +143,7 @@ export default function Header() {
               className="shrink-0 rounded-lg px-3 py-1.5 text-[13px] font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-cyan-200"
             >
               <span className="mr-1.5 font-mono text-[11px] text-slate-600">
-                {String(i + 1).padStart(2, '0')}
+                {m.num ?? String(i + 1).padStart(2, '0')}
               </span>
               {m.label}
             </button>

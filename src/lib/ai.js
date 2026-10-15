@@ -424,6 +424,299 @@ export function tutorRespond(question) {
   };
 }
 
+/* ——————————————————— Tabiiylashtirish (AI Text Humanizer) ——————————————————— */
+
+/** Apostrof variantlarini bitta klassda birlashtiradi (o' / oʻ / o'). */
+const APOS = "['\u2018\u02BB\u02BC]";
+
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** So'z chegaralari bilan ibora uchun regex (apostroflar mos). */
+function phraseRe(phrase) {
+  const body = escapeRe(phrase).replace(/'/g, APOS);
+  return new RegExp(`(?<![\\p{L}\\p{N}])${body}(?![\\p{L}\\p{N}])`, 'giu');
+}
+
+/** AI matnlarining eng ko'p uchraydigan bo'sh "qolip" iboralari — olib tashlanadi. */
+const FILLER_PHRASES = [
+  // o'zbekcha
+  'Zamonaviy dunyoda', 'Bugungi kunda', 'Bugungi jamiyatda', 'Zamonaviy jamiyatda',
+  "Shuni ta'kidlash joizki", "Ta'kidlash joizki", "Ta'kidlash kerakki", "Aytish joizki",
+  "Aytish kerakki", "Qayd etish joizki", "Qisqacha aytganda", "Xulosa qilib aytganda",
+  "Inobatga olsak", 'Shak-shubhasiz', "So'zsiz", 'Vijdonan aytganda',
+  'Jadal rivojlanayotgan', 'Rivojlangan jamiyatda', "So'nggi yillarda",
+  // inglizcha
+  "In today's fast-paced world", "In today's digital age", 'In the modern era',
+  'It is important to note that', 'It should be noted that', 'It is worth noting that',
+  'Needless to say', 'It goes without saying', 'At the end of the day',
+  'First and foremost', 'Last but not least', 'Needless to say',
+  // ruscha
+  'В современном мире', 'Стоит отметить, что', 'Несомненно', 'Как известно',
+];
+
+/** Quruq-quruq raspisanie o'rniga tabiiy variantlar. [ibora, variantlar[]] */
+const PHRASE_SWAPS = [
+  // o'zbekcha
+  ['katta ahamiyatga ega', ['muhim', 'asosiy']],
+  ['muhim ahamiyatga ega', ['muhim']],
+  ['amalga oshirilmoqda', ['bajarilmoqda', 'qilinmoqda']],
+  ['amalga oshirildi', ['bajarildi', 'qilindi']],
+  ['amalga oshirish', ['bajarish', 'qilish']],
+  ['yuzaga kelmoqda', ['chiqmoqda', 'bormoqda']],
+  ["ko'rib chiqilmoqda", ['muhokama qilinmoqda']],
+  ["qo'llaniladi", ['ishlatiladi']],
+  ["ta'minlaydi", ['beradi']],
+  ['shakllantiriladi', ['yaratiladi']],
+  ['yuzasidan', ['haqida', 'bo\u2019yicha']],
+  ['hisobga olinsa', ['agar kirsak', 'oddiy qaraganda']],
+  ['quyidagi', ['bu', 'mana ko\u2018rsatilgan']],
+  ['mazkur', ['bu']],
+  ['ushbu', ['bu', 'shu']],
+  ['belgilangan', ['tanlangan', 'aniqlangan']],
+  ["o'z o'rnida", ['o\u2018zi']],
+  ['keng qamrovli', ['batafsil', 'yorqin']],
+  ['bundan tashqari', ['Yana bir narsa', 'Shu bilan birga', 'Bunda ham']],
+  ['shuningdek', ['Yana', 'Bunda ham']],
+  ['shuning uchun', ['Shu bois', 'Shundan kelib chiqib']],
+  ['natijada', ['Buning natijasida', 'Oqibatda']],
+  ['xulosa qilib aytganda', ['Xulosada', 'Qisqasi']],
+  ["ma'lum bo'lishicha", ['ko\u2018rinib turibdiki']],
+  // inglizcha
+  ['utilize', ['use']], ['leverage', ['use']], ['commence', ['start']],
+  ['endeavor', ['try']], ['facilitate', ['help']], ['demonstrate', ['show']],
+  ['additionally', ['also']], ['furthermore', ['also']], ['moreover', ['also']],
+  ['consequently', ['so']], ['therefore', ['so']], ['however', ['but']],
+  ['nevertheless', ['still']], ['individuals', ['people']], ['numerous', ['many']],
+  ['significant', ['big']], ['approximately', ['about']], ['in order to', ['to']],
+  ['due to the fact that', ['because']], ['a plethora of', ['lots of']],
+  ['a myriad of', ['lots of']], ['a multitude of', ['lots of']],
+  ['crucial', ['key', 'big']], ['vital', ['key']], ['pivotal', ['key']],
+  ['robust', ['solid']], ['seamless', ['smooth']], ['comprehensive', ['full', 'complete']],
+  ['cutting-edge', ['new']], ['state-of-the-art', ['modern']],
+  ['ever-evolving', ['changing']], ['ever-changing', ['changing']],
+  ['delve into', ['look into']], ['dive deep into', ['explore']],
+  ['tapestry', ['mix']], ['landscape', ['field']], ['realm', ['area']],
+  ['testament to', ['proof of']], ['harness', ['use']], ['empower', ['help']],
+  ['elevate', ['improve']], ['foster', ['build']],
+  ['navigate the complexities of', ['deal with']], ['game-changer', ['big shift']],
+  // ruscha
+  ['осуществляется', ['выполняется']], ['играет важную роль', ['важен']],
+];
+
+/** Ortcha-ravoq qo'shimchalari — o'chiriladi. */
+const HEDGES = [
+  'juda ', 'mutlaqo ', 'butunlay ', 'haqiqatan ham ',
+  'very ', 'really ', 'absolutely ', 'truly ',
+];
+
+/** Inglizcha tabiiy qisqartmalar. */
+const EN_CONTRACTIONS = [
+  ['do not', "don't"], ['does not', "doesn't"], ['did not', "didn't"],
+  ['is not', "isn't"], ['are not', "aren't"], ['was not', "wasn't"],
+  ['were not', "weren't"], ['cannot', "can't"], ['will not', "won't"],
+  ['would not', "wouldn't"], ['should not', "shouldn't"], ['could not', "couldn't"],
+  ['it is', "it's"], ['that is', "that's"], ['there is', "there's"],
+  ['they are', "they're"], ['we are', "we're"], ['you are', "you're"],
+  ['let us', "let's"], ['have not', "haven't"], ['has not', "hasn't"],
+  ['i am', "I'm"], ['he is', "he's"], ['she is', "she's"],
+];
+
+/** Deterministik, lekin matnga bog'liq "tasodif" (bir xil matn — bir xil natija). */
+function hashStr(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i += 1) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function mulberry(seed) {
+  return function next() {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+let CHEAT_RES = null;
+function cheatRegexes() {
+  if (!CHEAT_RES) {
+    CHEAT_RES = [
+      ...FILLER_PHRASES.map((p) => phraseRe(p)),
+      ...PHRASE_SWAPS.map(([p]) => phraseRe(p)),
+    ];
+  }
+  return CHEAT_RES;
+}
+
+/**
+ * Matndagi "AIlik" darajasini 0\u2013100 ballda baholaydi:
+ * qolip iboralar zichligi + juda bir xil gap uzunliklari + rasmiy uzun so'zlar.
+ */
+export function aiScore(text) {
+  const ws = words(text);
+  const sents = sentences(text);
+  if (ws.length < 8 || sents.length === 0) return 0;
+
+  const low = String(text).toLowerCase();
+  let hits = 0;
+  for (const re of cheatRegexes()) hits += (low.match(re) || []).length;
+
+  const lens = sents.map((s) => words(s).length);
+  const mean = lens.reduce((a, b) => a + b, 0) / lens.length;
+  const sd = Math.sqrt(lens.reduce((a, b) => a + (b - mean) ** 2, 0) / lens.length);
+  const cv = mean > 0 ? sd / mean : 1;
+  const uniformity = cv < 0.35 ? (0.35 - cv) * 110 : 0;
+  const formality = mean > 22 ? Math.min(20, (mean - 22) * 1.6) : 0;
+  const longRatio = ws.filter((w) => w.length >= 8).length / ws.length;
+  const heavy = longRatio > 0.28 ? Math.min(15, (longRatio - 0.28) * 80) : 0;
+  const clicheCap = Math.min(45, (hits / ws.length) * 100 * 2.4);
+
+  return clamp(Math.round(10 + clicheCap + uniformity + formality + heavy), 0, 98);
+}
+
+/** Juda uzun gapni bog'lovchi so'zdan ikkiga bo'ladi. */
+function splitLongSentence(s) {
+  const re = /,\s+(va|lekin|chunki|shuning uchun|natijada|and|but|because)\s+/gi;
+  let m = null;
+  let candidate = null;
+  while ((m = re.exec(s)) !== null) {
+    if (m.index > 35) {
+      candidate = m;
+      break;
+    }
+  }
+  if (!candidate) return null;
+  const left = s.slice(0, candidate.index).trim().replace(/[,;:]$/, '') + '.';
+  const rightRaw = s.slice(candidate.index + candidate[0].length).trim();
+  if (!rightRaw) return null;
+  const right = rightRaw.charAt(0).toUpperCase() + rightRaw.slice(1);
+  if (words(left).length < 5 || words(right).length < 4) return null;
+  return [left, /[.!?…]$/.test(right) ? right : right + '.'];
+}
+
+/** Nuqtadan keyingi kichik harflarni kattaga aylantiradi. */
+function capitalizeAfterStops(s) {
+  return s.replace(/(^|[.!?…]\s+)([\p{Ll}])/gu, (full, pre, ch) => pre + ch.toUpperCase());
+}
+
+/**
+ * AI yozgan quruq matnni tabiiy, inson yozgandek uslubga o'giradi.
+ * Tarmoqsiz, deterministik ishlaydi: bir xil matn har doim bir xil natija beradi.
+ *
+ * @param {string} input — humanize qilinadigan matn
+ * @param {{intensity?: 'light'|'medium'|'strong'}} opts — kuch darajasi
+ * @returns {{text: string, changes: object[], stats: object}}
+ */
+export function humanizeText(input, { intensity = 'medium' } = {}) {
+  const source = String(input || '').replace(/\s+/g, ' ').trim();
+  const level = { light: 1, medium: 2, strong: 3 }[intensity] ?? 2;
+  const scoreBefore = aiScore(source);
+  const changes = [];
+  const rnd = mulberry(hashStr(source) ^ 0x9e3779b9);
+  let out = source;
+
+  // 1) Bo'sh qolip iboralarini olib tashlash (barcha darajalarda)
+  for (const phrase of FILLER_PHRASES) {
+    const re = new RegExp(
+      `(?<![\\p{L}\\p{N}])${escapeRe(phrase).replace(/'/g, APOS)}(?:\\s*,)?\\s*`,
+      'giu',
+    );
+    let count = 0;
+    out = out.replace(re, () => {
+      count += 1;
+      return ' ';
+    });
+    if (count) changes.push({ from: phrase, to: '—', type: 'filler', count });
+  }
+
+  // 2) Quruq iboralarni tabiiy variant bilan almashtirish (o'rta va kuchli)
+  if (level >= 2) {
+    for (const [phrase, variants] of PHRASE_SWAPS) {
+      const pick = variants[Math.floor(rnd() * variants.length)];
+      let count = 0;
+      out = out.replace(phraseRe(phrase), (match, offset) => {
+        count += 1;
+        // Gap boshida bo'lsa — katta harf bilan almashtiramiz
+        const before = out.slice(Math.max(0, offset - 2), offset);
+        const isSentenceStart = /(^|[.!?…]\s+)$/.test(before);
+        return isSentenceStart ? pick.charAt(0).toUpperCase() + pick.slice(1) : pick;
+      });
+      if (count) changes.push({ from: phrase, to: pick, type: 'swap', count });
+    }
+
+    // 3) Orta-ravoq qo'shimchalarni o'chirish
+    for (const hedge of HEDGES) {
+      const re = new RegExp(
+        `(?<![\\p{L}\\p{N}])${escapeRe(hedge.trim())}(?![\\p{L}\\p{N}])(?:\\s+|$)`,
+        'giu',
+      );
+      let count = 0;
+      out = out.replace(re, () => {
+        count += 1;
+        return ' ';
+      });
+      if (count) changes.push({ from: hedge.trim(), to: '—', type: 'hedge', count });
+    }
+  }
+
+  // 4) Inglizcha qisqartmalar (barcha darajalarda)
+  for (const [full, short] of EN_CONTRACTIONS) {
+    let count = 0;
+    out = out.replace(phraseRe(full), () => {
+      count += 1;
+      return short;
+    });
+    if (count) changes.push({ from: full, to: short, type: 'contract', count });
+  }
+
+  // 5) Juda uzun gaplarni ritm uchun bo'lish (faqat kuchli rejimda)
+  if (level >= 3) {
+    const rebuilt = [];
+    for (const s of sentences(out)) {
+      if (words(s).length > 28) {
+        const parts = splitLongSentence(s);
+        if (parts) {
+          rebuilt.push(parts[0], parts[1]);
+          changes.push({ from: 'uzun gap', to: '2 ta qisqa gap', type: 'rhythm', count: 1 });
+          continue;
+        }
+      }
+      rebuilt.push(s);
+    }
+    out = rebuilt.join(' ');
+  }
+
+  // 6) Yakuniy tozalash
+  out = out
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .replace(/,{2,}/g, ',')
+    .trim();
+  out = capitalizeAfterStops(out);
+
+  const scoreAfter = aiScore(out);
+  const clichesRemoved = changes
+    .filter((c) => c.type === 'filler' || c.type === 'hedge')
+    .reduce((a, c) => a + c.count, 0);
+
+  return {
+    text: out,
+    changes: changes.slice(0, 14),
+    stats: {
+      wordsBefore: words(source).length,
+      wordsAfter: words(out).length,
+      changes: changes.reduce((a, c) => a + c.count, 0),
+      clichesRemoved,
+      scoreBefore,
+      scoreAfter,
+      delta: scoreBefore - scoreAfter,
+    },
+  };
+}
+
 /* ———————————————————————————— Saqlash yordamchisi ———————————————————————————— */
 
 export function loadState(key, fallback) {

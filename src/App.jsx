@@ -1,4 +1,4 @@
-import { Bot, FileText, GraduationCap, ListChecks } from 'lucide-react';
+import { Bot, Feather, FileText, GraduationCap, ListChecks } from 'lucide-react';
 import Header from './components/Header.jsx';
 import AiSummarizer from './components/AiSummarizer.jsx';
 import AiEssayChecker from './components/AiEssayChecker.jsx';
@@ -8,12 +8,14 @@ import PomodoroTimer from './components/PomodoroTimer.jsx';
 import StudyPlanner from './components/StudyPlanner.jsx';
 import GpaCalculator from './components/GpaCalculator.jsx';
 import FormulaCheatSheet from './components/FormulaCheatSheet.jsx';
+import AiHumanizer from './components/AiHumanizer.jsx';
 
 const FEATURES = [
   { icon: FileText, text: 'Konspekt AI' },
   { icon: ListChecks, text: 'Test generator' },
   { icon: Bot, text: 'AI repetitor' },
   { icon: GraduationCap, text: 'GPA va jadval' },
+  { icon: Feather, text: 'AI Humanizer' },
 ];
 
 export default function App() {
@@ -82,6 +84,7 @@ export default function App() {
         <StudyPlanner />
         <GpaCalculator />
         <FormulaCheatSheet />
+        <AiHumanizer />
 
         {/* ——— Footer ——— */}
         <footer className="px-4 sm:px-6 lg:px-8">
