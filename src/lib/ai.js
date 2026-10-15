@@ -521,6 +521,521 @@ const EN_CONTRACTIONS = [
   ['i am', "I'm"], ['he is', "he's"], ['she is', "she's"],
 ];
 
+/* ——————— Agressiv dvigatel: katta sinonim leksikoni ——————— */
+
+/** Inglizcha: AI matnlarida eng ko'p uchraydigan rasmiy so'zlarning tabiiy variantlari. */
+const SYN_EN = {
+  important: ['key', 'big'], significant: ['big', 'major'], utilize: ['use'],
+  demonstrate: ['show', 'prove'], various: ['all sorts of', 'different'],
+  numerous: ['loads of', 'plenty of'], individuals: ['people'], children: ['kids'],
+  assistance: ['help'], additional: ['extra'], commence: ['start'], terminate: ['end'],
+  facilitate: ['help'], purchase: ['buy'], ascertain: ['find out'], endeavor: ['try'],
+  traditional: ['old-school', 'classic', 'time-tested'],
+  delicious: ['tasty', 'yum', 'seriously good'],
+  especially: ['mostly', 'above all', 'most of all'],
+  beautiful: ['gorgeous', 'stunning'], difficult: ['tough', 'tricky'],
+  easy: ['simple', 'a breeze'], quickly: ['fast', 'in no time'],
+  enough: ['plenty', 'more than enough'], include: ['pack in', 'feature'],
+  provide: ['give', 'hand'], require: ['need', 'call for'],
+  ensure: ['make sure', 'guarantee'], indicate: ['show', 'point to'],
+  suggest: ['hint at', 'propose'], argue: ['claim', 'insist'],
+  believe: ['think', 'figure'], consider: ['weigh up', 'think over'],
+  develop: ['build', 'grow'], create: ['make', 'build'],
+  maintain: ['keep up', 'hold'], establish: ['set up', 'kick off'],
+  implement: ['roll out', 'put in place'], evaluate: ['size up', 'check out'],
+  analyze: ['look into', 'go over'], examine: ['check out', 'look over'],
+  discover: ['find out', 'uncover'], explain: ['spell out', 'walk through'],
+  achieve: ['pull off', 'reach'], obtain: ['get', 'pick up'],
+  constitute: ['make up', 'form'], approximately: ['about', 'roughly'],
+  significantly: ['hugely', 'massively'], particularly: ['mostly', 'in particular'],
+  generally: ['usually', 'broadly'], typically: ['usually', 'as a rule'],
+  currently: ['right now', 'these days'], eventually: ['in the end', 'sooner or later'],
+  initially: ['at first', 'to begin with'], ultimately: ['in the end', "when all's said and done"],
+  frequently: ['often', 'loads of times'], rarely: ['hardly ever', 'not often'],
+  problem: ['issue', 'headache'], result: ['outcome', 'upshot'],
+  method: ['way', 'technique'], factor: ['piece', 'element'],
+  aspect: ['side', 'part'], benefit: ['plus', 'upside'],
+  drawback: ['downside', 'snag'], goal: ['aim', 'target'],
+  task: ['job', 'chore'], ability: ['skill', 'knack'],
+  possibility: ['chance', 'shot'], opportunity: ['chance', 'opening'],
+  difficulty: ['hassle', 'trouble'], success: ['win', 'breakthrough'],
+  failure: ['flop', 'miss'], change: ['shift', 'tweak'],
+  improve: ['boost', 'sharpen'], increase: ['boost', 'push up'],
+  reduce: ['cut', 'trim'], big: ['large', 'huge'], small: ['little', 'tiny'],
+  good: ['solid', 'great'], bad: ['poor', 'lousy'], make: ['build', 'put together'],
+  think: ['believe', 'figure'], say: ['tell', 'mention'],
+  however: ['but', 'though'], although: ['even though', 'though'],
+  because: ['since', 'as'], therefore: ["so", "that's why"],
+  moreover: ['also', 'plus'], besides: ['also', 'on top of that'],
+  regarding: ['about', 'on'], role: ['part', 'job'],
+};
+
+/** O'zbekcha: aniq sinonimlar (ma'no buzilmaydi, faqat uslub o'zgaradi). */
+const SYN_UZ = {
+  "muhim": ["asosiy", "hal qiluvchi"], "asosiy": ["muhim", "kalit"],
+  "qiyin": ["murakkab", "og'ir"], "murakkab": ["qiyin", "chigal"],
+  "oson": ["sodda", "yengil"], "sodda": ["oson", "tushunarli"],
+  "katta": ["yirik", "ulkan"], "kichik": ["mayda", "kichkinagina"],
+  "yaxshi": ["maqbul", "zo'r"], "yomon": ["salbiy", "kuchsiz"],
+  "tez": ["tezkor", "shoshilinch"], "sekin": ["asta", "birdan-bir"],
+  "ko'p": ["ancha", "xazir"], "oz": ["kam", "bir oz"],
+  "hamma": ["barcha", "barca"], "ba'zi": ["ayrim", "ba'zi bir"],
+  "yana": ["qaytadan", "yanada"], "lekin": ["ammo", "biroq"],
+  "ammo": ["lekin", "biroq"], "biroq": ["lekin", "ammo"],
+  "chunki": ["negaki", "sababi"], "shuning": ["shu bois"],
+  "natijada": ["oqibatda", "uning teskarisi"], "masalan": ["misol uchun", "aytaylik"],
+  "ayniqsa": ["xususan", "bitqin"], "odatda": ["ko'pincha", "odatda ham"],
+  "odamlar": ["insonlar", "xalq"], "insonlar": ["odamlar", "insoniyat"],
+  "rivojlanish": ["yuksalish", "o'sish"], "o'sish": ["rivojlanish", "ko'payish"],
+  "ta'lim": ["tahsil", "ta'lim-tarbiya"], "ilm": ["fan", "bilim"],
+  "qiyinchilik": ["og'irlik", "murakkablik"], "imkoniyat": ["fursat", "savod"],
+  "muammo": ["masala", "kamchilik"], "yechim": ["hal yo'li", "chora"],
+  "sabab": ["sabab-harakat", "ilova"], "natija": ["oqibat", "hosil"],
+  "foyda": ["manfaat", "foyda"], "zarar": ["salbiy", "yomon"],
+  "qoida": ["tartib", "qonun"], "kuch": ["drayv", "qudrat"],
+  "vaqt": ["payt", "dam"], "joy": ["o'rin", "makon"],
+  "doim": ["har doim", "tintuv"], "tez-tez": ["ko'pincha", "tik-tik"],
+  "hozir": ["hozircha", "shu payt"], "kelajakda": ["ertaga", "yaqin kelajakda"],
+  "avval": ["oldin", "birinchi"], "keyin": ["so'ng", "undan keyin"],
+  // ——— Eng ko'p uchraydigan so'zlar (barcha morfologik shakllari bilan) ———
+  "talaba": ["o'quvchi", "talabalik"], "talabalar": ["o'quvchilar", "yoshlar"],
+  "talabalarinig": ["o'quvchilarning"], "talabaga": ["o'quvigacha"],
+  "talabalarni": ["o'quvchilarni"], "talabalarga": ["o'quvchilarga"],
+  "o'qiydi": ["mutolaa qiladi", "kitob o'qiydi"], "o'qish": ["mutolaa", "kitob o'qish"],
+  "o'qiydi": ["mutolaa qiladi"], "o'qigan": ["mutolaa qilgan"],
+  "universitet": ["oliy ta'lim muassasasi", "univers"], "universitetda": ["oliy ta'lim muassasasida"],
+  "kutubxona": ["kitob ombori"], "kutubxonaga": ["kitob omboriga"],
+  "kutubxonada": ["kitob omborida"], "boradi": ["tashrif buyuradi", "yo'l oladi"],
+  "bordi": ["tashrif buyurdi", "yo'l oldi"], "borib": ["borib", "tashrif buyib"],
+  "fanlar": ["malakalar", "yorliqlar"], "fanlarni": ["malakalarni", "yorliqlarni"],
+  "o'rganish": ["o'zlashtirish", "ichga singdirish"], "o'rganadi": ["o'zlashtiradi", "ichga singdiradi"],
+  "qiziq": ["qiziqarli", "jarangli"], "kechqurun": ["tunda", "kechki vaqtda"],
+  "dars": ["mashg'ulot", "sabak"], "darslar": ["mashg'ulotlar", "sabaklar"],
+  "qiladi": ["bajaradi", "amalga oshiradi"], "qildi": ["bajardi", "amalga oshirdi"],
+  "kelajagini": ["istiqbolini", "ertangi kunini"], "belgilaydi": ["aniqlaydi", "ko'rsatadi"],
+  "hamma": ["barcha", "barca"], "ham": ["shuningdek", "yanagi"],
+  "bu": ["shu", "mana shu"], "shu": ["bu", "aynan"],
+  "yana": ["yanada", "qaytadan"], "lekin": ["ammo", "biroq"],
+  "bor": ["mavjud", "ustida"], "yo'q": ["yo'q", "mavjud emas"],
+  "katta": ["yirik", "tabiiy"], "kichik": ["mayda", "ziyrak"],
+  "tez": ["tezkor", "shoshilinch"], "sekin": ["asta-sekin", "birdan-bir"],
+  "yangi": ["yangiroq", "zo'r"], "eski": ["avvalgi", "ko'nikma"],
+  "qiyin": ["murakkab", "og'ir"], "oson": ["sodda", "yengil"],
+  "odamlar": ["insonlar", "xalq"], "insonlar": ["odamlar", "insoniyat"],
+  "jamiyat": ["jamoat", "olam"], "dunyo": ["olam", "sayyora"],
+  "hukumat": ["davlat", "rahbariyat"], "mamlakat": ["davlat", "yiynat"],
+  "shahar": ["shaharcha", "mahalla"], "qishloq": ["dehqonlik", "qishloqchilik"],
+  "ish": ["mehnat", "faoliyat"], "ishlar": ["mehnatlar", "faoliyatlar"],
+  "vaqt": ["payt", "dam"], "kun": ["kunlik", "bir kun"],
+  "soat": ["xacm soat", "vaqt"], "yil": ["yillar", "davr"],
+  "yaxshi": ["maqbul", "zo'r"], "yomon": ["salbiy", "kuchsiz"],
+  "ko'p": ["ancha", "xazir"], "oz": ["kam", "bir oz"],
+  "barcha": ["hamma", "barca"], "ayrim": ["ba'zi", "bir qator"],
+  "shuning": ["shu bois", "shu sababli"], "sababli": ["tufayli", " bois"],
+  "natijada": ["oqibatda", "uning natijasida"], "masalan": ["misol uchun", "aytaylik"],
+  "ayniqsa": ["xususan", "bitqin"], "odatda": ["ko'pincha", "odatda ham"],
+  "doim": ["har doim", "tintuv"], "hozir": ["hozircha", "shu payt"],
+  "ozgardi": ["almashdi", "o'zgardi"], "o'zgardi": ["almashdi", "qayta ko'rinish oldi"],
+  "ko'paydi": ["ko'pladi", "sodir bo'ldi"], "kamaydi": ["kamayib bordi", "pasaydi"],
+};
+
+/** Inglizcha tabiiy discourse-markerlar (gap boshlariga qo\u2018shiladi). */
+const MARKERS_EN = [
+  'Honestly,', 'Look,', 'The thing is,', "Here's the deal:", 'In practice,',
+  'That said,', 'Plus,', 'No doubt,', 'Funny thing is,', 'Sure,',
+];
+
+/** O\u2018zbekcha tabiiy discourse-markerlar. */
+const MARKERS_UZ = [
+  'Rostini aytsam,', 'Qarasangiz,', 'Xullas,', 'Aslida,', 'Qizigi shundaki,',
+  'Bunda shubha yoq,', 'Oddiy qilib aytganda,', 'Baribir,', 'Togrisi,',
+  'Xosh,', 'Qisqasi,',
+];
+
+/** Rasmiy iboralarning norasmiy, jonli variantlari (qo\u2018shimcha formal→casual). */
+const FORMAL_TO_CASUAL = [
+  ['in order to', ['to']], ['due to the fact that', ['because']],
+  ['at this point in time', ['right now', 'now']], ['in the near future', ['soon']],
+  ['for the purpose of', ['to', 'for']], ['has the ability to', ['can']],
+  ['is able to', ['can']], ['in spite of the fact that', ['although', 'even though']],
+  ['on a regular basis', ['regularly', 'often']], ['take into consideration', ['consider', 'weigh']],
+  ['a wide range of', ['loads of', 'all sorts of']], ['a large number of', ['loads of', 'tons of']],
+  ['plays an important role', ['matters a lot', 'does a lot']],
+  // o'zbekcha rasmiy→norasmiy
+  ['amalga oshirish', ['bajarish', 'qilish']], ['mazkur', ['bu']],
+  ['ushbu', ['bu', 'shu']], ['quyidagi', ['mana bu']],
+];
+
+/* ————————— Gap strukturasini qayta qurish (burstiness) ————————— */
+
+/** Bir so'zning barcha morfologik shakllarini hisobga olgan holda almashtirish uchun yordamchi. */
+function swapWord(word, dict) {
+  const lower = word.toLowerCase();
+  const variants = dict[lower];
+  if (!variants) return word;
+  const pick = variants[Math.floor(Math.random() * variants.length)];
+  // Kapitalizatsiyani saqlaymiz
+  if (word[0] === word[0].toUpperCase() && word[0] !== word[0].toLowerCase()) {
+    return pick.charAt(0).toUpperCase() + pick.slice(1);
+  }
+  return pick;
+}
+
+/** Gap ichida per-word sinonim almashtirish (inglizcha). */
+function swapSynonymsEn(sentence, rnd) {
+  return sentence.replace(/\b[A-Za-z]+\b/g, (w) => {
+    const dict = SYN_EN;
+    const lower = w.toLowerCase();
+    const variants = dict[lower];
+    if (!variants) return w;
+    const pick = variants[Math.floor(rnd() * variants.length)];
+    if (w[0] === w[0].toUpperCase() && w[0] !== w[0].toLowerCase()) {
+      return pick.charAt(0).toUpperCase() + pick.slice(1);
+    }
+    return pick;
+  });
+}
+
+/** Gap ichida per-word sinonim almashtirish (o'zbekcha, apostrof variantlarini hisobga oladi). */
+function swapSynonymsUz(sentence, rnd) {
+  return sentence.replace(/[A-Za-zʻʼ'’]+/g, (w) => {
+    const norm = w.replace(/[ʻʼ'’]/g, "'");
+    const variants = SYN_UZ[norm];
+    if (!variants) return w;
+    const pick = variants[Math.floor(rnd() * variants.length)];
+    if (w[0] === w[0].toUpperCase() && w[0] !== w[0].toLowerCase()) {
+      return pick.charAt(0).toUpperCase() + pick.slice(1);
+    }
+    return pick;
+  });
+}
+
+/** Gap boshiga tabiiy marker qo'shish (perplexity oshirish uchun). */
+function addDiscourseMarker(sentence, rnd, lang) {
+  const markers = lang === 'en' ? MARKERS_EN : MARKERS_UZ;
+  // Faqat 30% gapga marker qo'shamiz (aks holda juda ko'p bo'ladi)
+  if (rnd() > 0.3) return sentence;
+  const marker = markers[Math.floor(rnd() * markers.length)];
+  // Marker allaqachon bormi tekshirish
+  const alreadyHas = markers.some((m) => sentence.startsWith(m));
+  if (alreadyHas) return sentence;
+  // Gap juda qisqa bo'lmasin (>= 5 so'z)
+  if (sentence.split(/\s+/).length < 5) return sentence;
+  // Agar gap allaqachon boshqa bog'lovchi bilan boshlansa — qo'shmaymiz ("…is, also, research" kabi ikkilamchilik oldini olish)
+  const firstWord = sentence.split(/\s+/)[0].toLowerCase().replace(/[^a-z']/g, '');
+  const alreadyLinked = ['also', 'and', 'but', 'plus', 'however', 'moreover', 'furthermore',
+    'inconclusion', 'alsoand', 'thatsaid', 'funnythingis', 'honestly', 'look', 'also'].includes(firstWord);
+  if (alreadyLinked) return sentence;
+  return `${marker} ${sentence.charAt(0).toLowerCase()}${sentence.slice(1)}`;
+}
+
+/** Gap uzunliklarini qayta tartiblash — burstiness hosil qilish (qisqa→uzun→qisqa). */
+/**
+ * Gap ichiga tabiiy intensifier/fokus qo'shish — haqiqiy yangi so'zlar kiradi,
+ * shu bilan Jaccard distance haqiqatan oshadi (kafolat uchun).
+ */
+function amplifySentence(sentence, rnd, lang) {
+  const wordsArr = sentence.split(/\s+/);
+  if (wordsArr.length < 4) return sentence;
+  const amplifiers = lang === 'en'
+    ? ['honestly', 'in practice', 'for real', 'most of the time', 'the truth is']
+    : ['aslida', 'rostdan', 'aynan', "ko'pincha", "qizigi shundaki"];
+  const pick = amplifiers[Math.floor(rnd() * amplifiers.length)];
+  // Agar gap allaqachon boshlovchi bilan boshlansa (verguldan oldin qisqa clause) — qo'shmaymiz,
+  // aks holda "The truth is, in practice, ..." kabi ikkilamchilik paydo bo'ladi.
+  const firstClause = sentence.split(',')[0];
+  if (sentence.includes(',') && firstClause.split(/\s+/).length <= 5) return sentence;
+  // Gap boshiga intensifier qo'shish (50% ehtimol, juda ko'p bo'lmasligi uchun)
+  if (rnd() < 0.5 && !sentence.startsWith(pick)) {
+    return `${pick}, ${sentence.charAt(0).toLowerCase()}${sentence.slice(1)}`;
+  }
+  // Aks holda gap ichiga fokus qo'shish: fe'l oldiga intensifier
+  if (lang !== 'en' && wordsArr.length >= 5) {
+    const focusWords = ['tabiiyki', ' albatta', 'shubhasiz', ' ancha'];
+    const fw = focusWords[Math.floor(rnd() * focusWords.length)];
+    // Oxirgi fe'l oldiga qo'yishga urinish (so'nggi 3 so'zdan biri fe'l bo'lsa)
+    const idx = wordsArr.length - 2;
+    if (idx > 1 && rnd() < 0.4) {
+      wordsArr[idx] = `${fw.trim()} ${wordsArr[idx]}`;
+      return wordsArr.join(' ');
+    }
+  }
+  return sentence;
+}
+
+function burstifySentences(sents, rnd) {
+  const lens = sents.map((s) => s.split(/\s+/).length);
+  const avg = lens.reduce((a, b) => a + b, 0) / lens.length;
+  const rebuilt = [];
+  for (let i = 0; i < sents.length; i += 1) {
+    const words = lens[i];
+    // Juda qisqa gap (>3 so'z) va keyingisi ham qisqa bo'lsa — birlashtirish (grammatik vergul bilan)
+    if (words <= 3 && i + 1 < sents.length && lens[i + 1] <= 4 && rnd() < 0.4) {
+      const left = sents[i].replace(/[.!?…]+$/, '');
+      const right = sents[i + 1].replace(/^[.!?…]+\s*/, '');
+      const merged = `${left}, ${right.charAt(0).toLowerCase()}${right.slice(1)}`;
+      rebuilt.push(merged.trim());
+      i += 1;
+      continue;
+    }
+    // Juda uzun gap (>28 so'z) bo'lsa — bo'lishga urinish
+    if (words > 28) {
+      const parts = splitLongSentence(sents[i]);
+      if (parts) {
+        rebuilt.push(parts[0], parts[1]);
+        continue;
+      }
+    }
+    rebuilt.push(sents[i]);
+  }
+  return rebuilt;
+}
+
+/** Jaccard-similarite: qancha so'z o'zgarganini hisoblash (0-1, 0 = hammasi o'zgardi). */
+function jaccardDiff(a, b) {
+  const A = new Set(words(a));
+  const B = new Set(words(b));
+  if (A.size === 0 && B.size === 0) return 0;
+  const inter = new Set([...A].filter((w) => B.has(w)));
+  const union = new Set([...A, ...B]);
+  return 1 - inter.size / union.size;
+}
+
+/* ————————— Yangi agressiv humanize funksiyasi ————————— */
+
+/**
+ * AI yozgan matnni tubdan qayta yozadi: katta sinonim leksikoni,
+ * gap restrukturizatsiyasi (burstiness), tabiiy markerlar va
+ * matematik kafolat (kamida 40-60% o'zgarish).
+ *
+ * @param {string} input — qayta yoziladigan matn
+ * @param {{intensity?: 'light'|'medium'|'strong'}} opts — kuch darajasi
+ * @returns {{text: string, changes: object[], stats: object}}
+ */
+export function humanizeAggressive(input, { intensity = 'medium' } = {}) {
+  const source = String(input || '').replace(/\s+/g, ' ').trim();
+  if (!source) return { text: '', changes: [], stats: emptyHumanizeStats() };
+
+  const level = { light: 1, medium: 2, strong: 3 }[intensity] ?? 2;
+  // Kafolat: kamida shuncha o'zgarish bo'lishi shart (Jaccard distance).
+  // Qisqa matnlar uchun (30 so'zdan kam) target 0.15 ga yumshatiladi —
+  // 40-60% oralig'i saqlanadi, lekin qisqa matnda 60% erishish tabiatan qiyin.
+  const baseTarget = { 1: 0.4, 2: 0.5, 3: 0.6 }[level];
+  const wordCount = words(source).length;
+  const minChangeTarget = wordCount < 30 ? Math.max(0.4, baseTarget - 0.15) : baseTarget;
+  const changes = [];
+  const rnd = mulberry(hashStr(source) ^ 0x51ed2701);
+  const scoreBefore = aiScore(source);
+
+  // Til aniqlash (kirill harflari bo'lsa ru, apostrof yoki o'zbekcha so'zlar bo'lsa uz, aks holda en)
+  const hasCyrillic = /[\u0400-\u04FF]/.test(source);
+  const lang = hasCyrillic ? 'ru' : detectLang(source);
+
+  let out = source;
+  const maxPasses = level === 3 ? 5 : level === 2 ? 4 : 3;
+  let pass = 0;
+
+  while (pass < maxPasses) {
+    pass += 1;
+    const prevOut = out;
+
+    // 1) Bo'sh qolip iboralarini olib tashlash (barcha passlarda)
+    for (const phrase of FILLER_PHRASES) {
+      const re = new RegExp(
+        `(?<![\\p{L}\\p{N}])${escapeRe(phrase).replace(/'/g, APOS)}(?:\\s*,)?\\s*`,
+        'giu',
+      );
+      let count = 0;
+      out = out.replace(re, () => { count += 1; return ' '; });
+      if (count) changes.push({ from: phrase, to: '—', type: 'filler', count });
+    }
+
+    // 2) Quruq iboralar → tabiiy variant (level >= 2)
+    if (level >= 2) {
+      for (const [phrase, variants] of PHRASE_SWAPS) {
+        const pick = variants[Math.floor(rnd() * variants.length)];
+        let count = 0;
+        out = out.replace(phraseRe(phrase), (match, offset) => {
+          count += 1;
+          const before = out.slice(Math.max(0, offset - 2), offset);
+          const isSentStart = /(^|[.!?…]\s+)$/.test(before);
+          return isSentStart ? pick.charAt(0).toUpperCase() + pick.slice(1) : pick;
+        });
+        if (count) changes.push({ from: phrase, to: pick, type: 'swap', count });
+      }
+
+      // 3) Orta-ravoq qo'shimchalarni o'chirish
+      for (const hedge of HEDGES) {
+        const re = new RegExp(
+          `(?<![\\p{L}\\p{N}])${escapeRe(hedge.trim())}(?![\\p{L}\\p{N}])(?:\\s+|$)`,
+          'giu',
+        );
+        let count = 0;
+        out = out.replace(re, () => { count += 1; return ' '; });
+        if (count) changes.push({ from: hedge.trim(), to: '—', type: 'hedge', count });
+      }
+    }
+
+    // 4) Inglizcha qisqartmalar
+    for (const [full, short] of EN_CONTRACTIONS) {
+      let count = 0;
+      out = out.replace(phraseRe(full), () => { count += 1; return short; });
+      if (count) changes.push({ from: full, to: short, type: 'contract', count });
+    }
+
+    // 5) Rasmiy → norasmiy iboralar
+    for (const [phrase, variants] of FORMAL_TO_CASUAL) {
+      const pick = variants[Math.floor(rnd() * variants.length)];
+      let count = 0;
+      out = out.replace(phraseRe(phrase), (match, offset) => {
+        count += 1;
+        const before = out.slice(Math.max(0, offset - 2), offset);
+        const isSentStart = /(^|[.!?…]\s+)$/.test(before);
+        return isSentStart ? pick.charAt(0).toUpperCase() + pick.slice(1) : pick;
+      });
+      if (count) changes.push({ from: phrase, to: pick, type: 'casual', count });
+    }
+
+    // 6) Gap ajratish va per-sentence rewrite (perplexity + burstiness)
+    const sents = sentences(out);
+    const rewritten = [];
+    for (let sent of sents) {
+      if (!sent.trim()) continue;
+      if (lang === 'en') {
+        sent = swapSynonymsEn(sent, rnd);
+      } else if (lang === 'uz') {
+        sent = swapSynonymsUz(sent, rnd);
+      }
+      // ru tilida synonym swap yo'q (xavfsizlik uchun), faqat marker + burstiness
+      sent = addDiscourseMarker(sent, rnd, lang);
+      rewritten.push(sent);
+    }
+
+    // 7) Burstiness: uzunliklarni aralashtirish (qisqa↔uzun)
+    out = burstifySentences(rewritten, rnd).join(' ');
+
+    // 8) Tozalash
+    out = out
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s+([,.;:!?])/g, '$1')
+      .replace(/,{2,}/g, ',')
+      .trim();
+    out = capitalizeAfterStops(out);
+
+    // 9) Kafolat tekshiruvi — yetarli o'zgarish bo'lsa to'xtatish
+    const changePct = jaccardDiff(source, out);
+    if (changePct >= minChangeTarget) {
+      changes.push({
+        from: `${pass} pass`,
+        to: `${Math.round(changePct * 100)}% o'zgarish`,
+        type: 'guarantee',
+        count: 1,
+      });
+      break;
+    }
+
+    // Agar o'zgarish bo'lmasa — amplify passni majburiy qo'llash (cheksiz sikl oldini olish uchun sanash)
+    if (out === prevOut) {
+      // Fallback: har bir gapga intensifier/fokus qo'shish (haqiqiy o'zgarish)
+      const fb = sentences(out).map((s) => amplifySentence(s, rnd, lang));
+      out = fb.join(' ');
+      out = capitalizeAfterStops(out.replace(/\s{2,}/g, ' ').trim());
+      // Agar hali ham o'zgarmagan bo'lsa — to'xtatish (pass limitiga yetganmiz)
+      if (out === prevOut) break;
+    }
+  }
+
+  // Loop tugagach, target oshilmagan bo'lsa — qo'shimcha amplify passlar (kafolat uchun)
+  let extraPass = 0;
+  while (jaccardDiff(source, out) < minChangeTarget && extraPass < 4) {
+    extraPass += 1;
+    const fb = sentences(out).map((s) => amplifySentence(s, rnd, lang));
+    const next = capitalizeAfterStops(fb.join(' ').replace(/\s{2,}/g, ' ').trim());
+    if (next === out) break;
+    out = next;
+  }
+
+  // Yakuniy tozalash
+  out = out.replace(/\s{2,}/g, ' ').trim();
+  out = capitalizeAfterStops(out);
+
+  const scoreAfter = aiScore(out);
+  const changePctFinal = jaccardDiff(source, out);
+  // Natija chiptasi — target oshilsa ham, oshmasa ham ko'rinadi (UX: changePercent har doim ko'rinadi)
+  if (!changes.some((c) => c.type === 'guarantee')) {
+    changes.push({
+      from: `${pass + extraPass} pass`,
+      to: `${Math.round(changePctFinal * 100)}% o'zgarish`,
+      type: 'guarantee',
+      count: 1,
+    });
+  }
+  const clichesRemoved = changes
+    .filter((c) => ['filler', 'hedge', 'casual', 'swap'].includes(c.type))
+    .reduce((a, c) => a + c.count, 0);
+
+  return {
+    text: out,
+    changes: dedupeChanges(changes).slice(0, 16),
+    stats: {
+      wordsBefore: words(source).length,
+      wordsAfter: words(out).length,
+      changes: dedupeChanges(changes).reduce((a, c) => a + c.count, 0),
+      clichesRemoved,
+      scoreBefore,
+      scoreAfter,
+      delta: scoreBefore - scoreAfter,
+      changePercent: Math.round(changePctFinal * 100),
+      passes: pass,
+      language: lang,
+    },
+  };
+}
+
+/**
+ * Ommaviy API: agressiv dvigatelga delegate qiladi.
+ * Eski nomni saqlab, yangi kuchli mantıqni ishlatadi.
+ */
+export function humanizeText(input, opts = {}) {
+  return humanizeAggressive(input, opts);
+}
+
+function detectLang(text) {
+  const uzMarkers = ['va', 'bir', 'bu', 'uchun', 'ham', 'lekin', 'shu', 'o\u2018', 'qil', 'bor'];
+  const enMarkers = ['the', 'and', 'is', 'are', 'was', 'for', 'that', 'with', 'this'];
+  const wordsArr = words(text).slice(0, 30);
+  let uzScore = 0;
+  let enScore = 0;
+  for (const w of wordsArr) {
+    if (uzMarkers.includes(w) || /[ʻʼ]/.test(w)) uzScore += 1;
+    if (enMarkers.includes(w)) enScore += 1;
+  }
+  if (uzScore > enScore) return 'uz';
+  if (enScore > uzScore) return 'en';
+  // Default: uz (loyiha o'zbek tilida)
+  return 'uz';
+}
+
+function dedupeChanges(changes) {
+  const seen = new Map();
+  for (const c of changes) {
+    const key = `${c.type}:${c.from}`;
+    if (seen.has(key)) {
+      seen.get(key).count += c.count;
+    } else {
+      seen.set(key, { ...c });
+    }
+  }
+  return [...seen.values()];
+}
+
+function emptyHumanizeStats() {
+  return {
+    wordsBefore: 0, wordsAfter: 0, changes: 0, clichesRemoved: 0,
+    scoreBefore: 0, scoreAfter: 0, delta: 0, changePercent: 0, passes: 0, language: 'uz',
+  };
+}
+
 /** Deterministik, lekin matnga bog'liq "tasodif" (bir xil matn — bir xil natija). */
 function hashStr(s) {
   let h = 2166136261;
@@ -577,6 +1092,89 @@ export function aiScore(text) {
   return clamp(Math.round(10 + clicheCap + uniformity + formality + heavy), 0, 98);
 }
 
+/**
+ * ZeroGPT-uslubudagi tekshiruv (tarmoqsiz, lokal heuristika):
+ * matnni gaplarga bo'lib, har bir gapni AI belgilari bo'yicha 0–100 ball
+ * baholaydi va umumiy AI / Human foizlarini qaytaradi.
+ *
+ * Segment darajalari (ZeroGPT uslubidagi highlight uchun):
+ *   - 'ai'    (ball ≥ 58) — qizil, aniq AI belgilari
+ *   - 'warn'  (ball 34–57) — sarg'ish, shubhali
+ *   - 'human' (ball < 34) — inson yozgandek
+ *
+ * @param {string} text
+ * @returns {{aiPercent: number, humanPercent: number,
+ *   verdict: 'human'|'mixed'|'ai'|'short',
+ *   segments: Array<{text: string, score: number,
+ *     level: 'human'|'warn'|'ai', wordCount: number}>}}
+ */
+export function detectAiText(text) {
+  const raw = String(text || '').replace(/\s+/g, ' ').trim();
+  const sents = sentences(raw);
+  const ws = words(raw);
+
+  // Juda qisqa matn — baholab bo'lmaydi
+  if (!raw || ws.length < 6) {
+    return {
+      aiPercent: 0,
+      humanPercent: 0,
+      verdict: 'short',
+      segments: sents.map((s) => ({
+        text: s, score: 0, level: 'human', wordCount: words(s).length,
+      })),
+    };
+  }
+
+  const segments = sents.map((s) => {
+    const sw = words(s);
+    const low = s.toLowerCase();
+    let hits = 0;
+    for (const re of cheatRegexes()) hits += (low.match(re) || []).length;
+
+    const clicheDensity = sw.length ? (hits / sw.length) * 100 : 0;
+    const longRatio = sw.length
+      ? sw.filter((w) => w.length >= 8).length / sw.length
+      : 0;
+
+    let score = 8; // bazaviy ball — har qanday matnda
+    score += Math.min(44, clicheDensity * 2.6); // qolip iboralar zichligi
+    score += hits >= 2 ? 7 : 0; // bir nechta qolip birdan
+    score += longRatio > 0.22
+      ? Math.min(15, (longRatio - 0.22) * 65)
+      : 0; // rasmiy uzun so'zlar
+    score += sw.length > 26
+      ? Math.min(12, (sw.length - 26) * 1.2)
+      : 0; // juda uzun "inhisar" gaplar
+    score = clamp(Math.round(score), 0, 97);
+
+    const level = score >= 58 ? 'ai' : score >= 34 ? 'warn' : 'human';
+    return { text: s, score, level, wordCount: sw.length };
+  });
+
+  // So'z vazni bilan o'rtacha + gap uzunliklarining bir xilligi (uniformity) bonusi:
+  // AI matnlarida gaplar sun'iy darajada bir xil uzunlikda bo'ladi (burstiness kam).
+  const totalWords = segments.reduce((a, s) => a + s.wordCount, 0);
+  let ai = totalWords
+    ? segments.reduce((a, s) => a + s.score * s.wordCount, 0) / totalWords
+    : 0;
+  const lens = segments.map((s) => s.wordCount);
+  if (lens.length >= 3) {
+    const mean = lens.reduce((a, b) => a + b, 0) / lens.length;
+    const sd = Math.sqrt(
+      lens.reduce((a, b) => a + (b - mean) ** 2, 0) / lens.length,
+    );
+    const cv = mean > 0 ? sd / mean : 1;
+    if (cv < 0.4) ai += (0.4 - cv) * 16;
+  }
+
+  const aiPercent = clamp(Math.round(ai), 2, 97);
+  const humanPercent = 100 - aiPercent;
+  const verdict =
+    humanPercent >= 70 ? 'human' : aiPercent >= 50 ? 'ai' : 'mixed';
+
+  return { aiPercent, humanPercent, verdict, segments };
+}
+
 /** Juda uzun gapni bog'lovchi so'zdan ikkiga bo'ladi. */
 function splitLongSentence(s) {
   const re = /,\s+(va|lekin|chunki|shuning uchun|natijada|and|but|because)\s+/gi;
@@ -600,121 +1198,6 @@ function splitLongSentence(s) {
 /** Nuqtadan keyingi kichik harflarni kattaga aylantiradi. */
 function capitalizeAfterStops(s) {
   return s.replace(/(^|[.!?…]\s+)([\p{Ll}])/gu, (full, pre, ch) => pre + ch.toUpperCase());
-}
-
-/**
- * AI yozgan quruq matnni tabiiy, inson yozgandek uslubga o'giradi.
- * Tarmoqsiz, deterministik ishlaydi: bir xil matn har doim bir xil natija beradi.
- *
- * @param {string} input — humanize qilinadigan matn
- * @param {{intensity?: 'light'|'medium'|'strong'}} opts — kuch darajasi
- * @returns {{text: string, changes: object[], stats: object}}
- */
-export function humanizeText(input, { intensity = 'medium' } = {}) {
-  const source = String(input || '').replace(/\s+/g, ' ').trim();
-  const level = { light: 1, medium: 2, strong: 3 }[intensity] ?? 2;
-  const scoreBefore = aiScore(source);
-  const changes = [];
-  const rnd = mulberry(hashStr(source) ^ 0x9e3779b9);
-  let out = source;
-
-  // 1) Bo'sh qolip iboralarini olib tashlash (barcha darajalarda)
-  for (const phrase of FILLER_PHRASES) {
-    const re = new RegExp(
-      `(?<![\\p{L}\\p{N}])${escapeRe(phrase).replace(/'/g, APOS)}(?:\\s*,)?\\s*`,
-      'giu',
-    );
-    let count = 0;
-    out = out.replace(re, () => {
-      count += 1;
-      return ' ';
-    });
-    if (count) changes.push({ from: phrase, to: '—', type: 'filler', count });
-  }
-
-  // 2) Quruq iboralarni tabiiy variant bilan almashtirish (o'rta va kuchli)
-  if (level >= 2) {
-    for (const [phrase, variants] of PHRASE_SWAPS) {
-      const pick = variants[Math.floor(rnd() * variants.length)];
-      let count = 0;
-      out = out.replace(phraseRe(phrase), (match, offset) => {
-        count += 1;
-        // Gap boshida bo'lsa — katta harf bilan almashtiramiz
-        const before = out.slice(Math.max(0, offset - 2), offset);
-        const isSentenceStart = /(^|[.!?…]\s+)$/.test(before);
-        return isSentenceStart ? pick.charAt(0).toUpperCase() + pick.slice(1) : pick;
-      });
-      if (count) changes.push({ from: phrase, to: pick, type: 'swap', count });
-    }
-
-    // 3) Orta-ravoq qo'shimchalarni o'chirish
-    for (const hedge of HEDGES) {
-      const re = new RegExp(
-        `(?<![\\p{L}\\p{N}])${escapeRe(hedge.trim())}(?![\\p{L}\\p{N}])(?:\\s+|$)`,
-        'giu',
-      );
-      let count = 0;
-      out = out.replace(re, () => {
-        count += 1;
-        return ' ';
-      });
-      if (count) changes.push({ from: hedge.trim(), to: '—', type: 'hedge', count });
-    }
-  }
-
-  // 4) Inglizcha qisqartmalar (barcha darajalarda)
-  for (const [full, short] of EN_CONTRACTIONS) {
-    let count = 0;
-    out = out.replace(phraseRe(full), () => {
-      count += 1;
-      return short;
-    });
-    if (count) changes.push({ from: full, to: short, type: 'contract', count });
-  }
-
-  // 5) Juda uzun gaplarni ritm uchun bo'lish (faqat kuchli rejimda)
-  if (level >= 3) {
-    const rebuilt = [];
-    for (const s of sentences(out)) {
-      if (words(s).length > 28) {
-        const parts = splitLongSentence(s);
-        if (parts) {
-          rebuilt.push(parts[0], parts[1]);
-          changes.push({ from: 'uzun gap', to: '2 ta qisqa gap', type: 'rhythm', count: 1 });
-          continue;
-        }
-      }
-      rebuilt.push(s);
-    }
-    out = rebuilt.join(' ');
-  }
-
-  // 6) Yakuniy tozalash
-  out = out
-    .replace(/\s{2,}/g, ' ')
-    .replace(/\s+([,.;:!?])/g, '$1')
-    .replace(/,{2,}/g, ',')
-    .trim();
-  out = capitalizeAfterStops(out);
-
-  const scoreAfter = aiScore(out);
-  const clichesRemoved = changes
-    .filter((c) => c.type === 'filler' || c.type === 'hedge')
-    .reduce((a, c) => a + c.count, 0);
-
-  return {
-    text: out,
-    changes: changes.slice(0, 14),
-    stats: {
-      wordsBefore: words(source).length,
-      wordsAfter: words(out).length,
-      changes: changes.reduce((a, c) => a + c.count, 0),
-      clichesRemoved,
-      scoreBefore,
-      scoreAfter,
-      delta: scoreBefore - scoreAfter,
-    },
-  };
 }
 
 /* ———————————————————————————— Saqlash yordamchisi ———————————————————————————— */
