@@ -8,7 +8,7 @@ const STORAGE_KEY = 'sa_humanizer_text';
 const INTENSITIES = [
   { id: 'light', label: 'Yengil', hint: "Faqat eng ko'p uchraydigan qoliplarni olib tashlaydi" },
   { id: 'medium', label: "O'rta", hint: 'Qolip so\'zlar + tabiiy variant tanlovi + ritm' },
-  { id: 'strong', label: 'Kuchli', hint: "To'liq qayta yozish uslubi, uzun gaplar bo'linadi" },
+  { id: 'strong', label: 'Kuchli', hint: "To'liq sintaksis qayta quriladi: pasiv→faol, ritm, tabiiy savollar" },
 ];
 
 /** Namuna: sun'iy intellekt uslubidagi quruq, qoliplarga to'la matn. */
@@ -211,7 +211,7 @@ export default function AiHumanizer() {
         </span>
         <span className="inline-flex items-center gap-1.5 text-emerald-300">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
-          humanize.engine v3 · zerogpt detector
+          humanize.engine v4 · burstiness ruleset
         </span>
       </div>
 

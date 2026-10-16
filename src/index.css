@@ -16,6 +16,9 @@
   body {
     @apply bg-[#0d0d1a] text-slate-200 antialiased;
     font-family: var(--font-sans);
+    /* Telegram Mini App / iOS safe-area: header va pastdagi bar bilan moslashuv */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   h1,

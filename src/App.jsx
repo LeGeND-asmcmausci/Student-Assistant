@@ -20,7 +20,7 @@ const FEATURES = [
 
 export default function App() {
   return (
-    <div id="top" className="relative min-h-screen">
+    <div id="top" className="relative min-h-[100dvh]">
       {/* Harakatlanuvchi Aurora gradient dog'lari */}
       <div className="aurora" aria-hidden="true">
         <div className="aurora-orb" />

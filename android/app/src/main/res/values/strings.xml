@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Student Assistant</string>
+    <string name="title_activity_main">Student Assistant</string>
+    <string name="package_name">uz.student.assistant</string>
+    <string name="custom_url_scheme">uz.student.assistant</string>
+</resources>

@@ -1,0 +1,11 @@
+{
+  "appId": "uz.student.assistant",
+  "appName": "Student Assistant",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0d0d1a"
+  }
+}

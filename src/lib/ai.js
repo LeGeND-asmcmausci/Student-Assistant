@@ -499,6 +499,17 @@ const PHRASE_SWAPS = [
   ['testament to', ['proof of']], ['harness', ['use']], ['empower', ['help']],
   ['elevate', ['improve']], ['foster', ['build']],
   ['navigate the complexities of', ['deal with']], ['game-changer', ['big shift']],
+  // ——— Ruleset v4: yangi AI-buzzwordlar (rule 2) ———
+  ['plays a crucial role', ['matters', 'does a lot']],
+  ['play a crucial role', ['matter', 'do a lot']],
+  ['plays a vital role', ['matters', 'does a lot']],
+  ['play a vital role', ['matter', 'do a lot']],
+  ['an indispensable', ['a must-have', 'a key']],
+  ['seamlessly', ['smoothly', 'without a hitch']],
+  ['rich flavor', ['deep flavor', 'hearty taste']],
+  ['in summary', ['to sum it up', 'all in all']],
+  ['in conclusion', ['to wrap up', 'in the end']],
+  ['negatively impact', ['hurt', 'harm']],
   // ruscha
   ['осуществляется', ['выполняется']], ['играет важную роль', ['важен']],
 ];
@@ -507,6 +518,7 @@ const PHRASE_SWAPS = [
 const HEDGES = [
   'juda ', 'mutlaqo ', 'butunlay ', 'haqiqatan ham ',
   'very ', 'really ', 'absolutely ', 'truly ',
+  'extensively ', 'seamlessly ', 'perfectly ',
 ];
 
 /** Inglizcha tabiiy qisqartmalar. */
@@ -519,6 +531,10 @@ const EN_CONTRACTIONS = [
   ['they are', "they're"], ['we are', "we're"], ['you are', "you're"],
   ['let us', "let's"], ['have not', "haven't"], ['has not', "hasn't"],
   ['i am', "I'm"], ['he is', "he's"], ['she is', "she's"],
+  // Ruleset v4: tabiiy qisqartmalar (rule 3)
+  ['we will', "we'll"], ['they will', "they'll"], ['you will', "you'll"],
+  ['it will', "it'll"], ['i will', "I'll"], ['he will', "he'll"],
+  ['she will', "she'll"], ['we are', "we're"], ['is not', "isn't"],
 ];
 
 /* ——————— Agressiv dvigatel: katta sinonim leksikoni ——————— */
@@ -568,6 +584,15 @@ const SYN_EN = {
   because: ['since', 'as'], therefore: ["so", "that's why"],
   moreover: ['also', 'plus'], besides: ['also', 'on top of that'],
   regarding: ['about', 'on'], role: ['part', 'job'],
+  // ——— Ruleset v4 (rule 2): aniq, tabiiy variantlar ———
+  contemporary: ['present-day', 'current'], streamline: ['simplify', 'trim'],
+  productivity: ['output', 'pace'], scholars: ['researchers', 'teachers'],
+  ecosystem: ['system', 'network'], component: ['part', 'piece'],
+  readiness: ['preparedness', 'fitness'], rapidly: ['fast', 'quickly'],
+  enhance: ['boost', 'improve'], indispensable: ['essential', 'vital'],
+  undoubtedly: ['no doubt', 'surely'], essential: ['key', 'vital'],
+  collaborative: ['team-based', 'joint'], transform: ['change', 'reshape'],
+  negative: ['bad'], notably: ['markedly'],
 };
 
 /** O'zbekcha: aniq sinonimlar (ma'no buzilmaydi, faqat uslub o'zgaradi). */
@@ -639,18 +664,144 @@ const SYN_UZ = {
   "ko'paydi": ["ko'pladi", "sodir bo'ldi"], "kamaydi": ["kamayib bordi", "pasaydi"],
 };
 
-/** Inglizcha tabiiy discourse-markerlar (gap boshlariga qo\u2018shiladi). */
-const MARKERS_EN = [
-  'Honestly,', 'Look,', 'The thing is,', "Here's the deal:", 'In practice,',
-  'That said,', 'Plus,', 'No doubt,', 'Funny thing is,', 'Sure,',
+/* ——— Ruleset v4: filler markerlar OCHIRILDI (rule 4) ———
+ * "The thing is", "No doubt" kabi qoshimcha fillerlar taqiqlangan.
+ * Orniga haqiqiy sintaksis qayta quriladi: pasiv->faol, savol,
+ * ochilishlarini xilma-xilligi, ritm. ——— */
+
+/** Yordamchi fe'llar (savol qurish uchun). */
+const AUX_SET = new Set([
+  'is', 'are', 'was', 'were', 'can', 'could', 'will', 'would',
+  'should', 'may', 'might', 'must', 'do', 'does', 'did', 'has',
+  'have', 'had',
+]);
+
+/** Artikl/olovchi/ollovchi so'zlar (pastga tushirish uchun). */
+const DET_HEADS = new Set([
+  'the', 'this', 'that', 'these', 'those', 'a', 'an', 'my', 'your',
+  'his', 'her', 'its', 'our', 'their', 'there',
+  'it', 'they', 'we', 'you', 'he', 'she',
+]);
+
+/** Do-support uchun ollovchi xaritasi. */
+const DO_PRON = {
+  it: 'Does', this: 'Does', that: 'Does', he: 'Does', she: 'Does',
+  you: 'Do', we: 'Do', they: 'Do',
+};
+
+const capWord = (w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w);
+
+/** Gap boshidagi artikl/olovchi so'zni kichik harfga tushiradi. */
+function lowerIfDet(head) {
+  const [first, ...rest] = head.split(/\s+/);
+  const joined = rest.length ? ' ' + rest.join(' ') : '';
+  return DET_HEADS.has(first.toLowerCase())
+    ? first.toLowerCase() + joined
+    : head;
+}
+
+/**
+ * Qoida 3: qisqa deklarativ gapni tabiiy savolga aylantirish
+ * (aux invert yoki do-support). Mano 100% saqlanadi.
+ *
+ * @returns {string|null} yangi savol yoki null
+ */
+function toQuestion(sent) {
+  const m = sent.match(/^(.+?)([.!?…])$/);
+  const body = m ? m[1] : sent;
+  if (!body || body.includes(',')) return null; // murakkab gapga tegmaymiz
+  const w = body.split(/\s+/);
+  if (w.length < 2 || w.length > 12) return null;
+
+  // 1) Yordamchi fe'l invert: "AI is changing..." -> "Is AI changing...?"
+  for (const ai of [1, 2]) {
+    if (ai >= w.length) continue;
+    const aux = w[ai].toLowerCase().replace(/[^a-z']/g, '');
+    if (!AUX_SET.has(aux)) continue;
+    const subj = w.slice(0, ai).join(' ');
+    if (words(subj).length > 3) continue;
+    const rest = w.slice(ai + 1).join(' ').trim();
+    const subjOut = ai === 2 ? lowerIfDet(subj) : subj;
+    return `${capWord(w[ai])} ${subjOut} ${rest}`.replace(/\s{2,}/g, ' ').trim() + '?';
+  }
+
+  // 2) Do-support: "It matters." -> "Does it matter?"
+  const pron = DO_PRON[w[0].toLowerCase().replace(/[^a-z']/g, '')];
+  if (pron && w.length >= 2) {
+    const vLow = w[1].toLowerCase();
+    if (!AUX_SET.has(vLow) && /[a-z]s$/.test(vLow) && !/(ss|us|is|as|has)$/.test(vLow)) {
+      let stem;
+      if (/ies$/.test(vLow)) stem = vLow.slice(0, -3) + 'y';
+      else if (/(ses|xes|zes|ches|shes)$/.test(vLow)) stem = vLow.slice(0, -2);
+      else stem = vLow.slice(0, -1);
+      const rest = [stem, ...w.slice(2)].join(' ');
+      return `${pron} ${w[0]} ${rest}`.replace(/\s{2,}/g, ' ').trim() + '?';
+    }
+  }
+  return null;
+}
+
+/**
+ * Qoida 3: pasiv -> faol ovoz (inglizcha).
+ * "The meal was cooked by my mom." -> "My mom cooked the meal."
+ * Faqat o'tgan zamon (was/were) — qiyma o'zgarmaydi, xavfsiz.
+ *
+ * @returns {string|null} faol gap yoki null
+ */
+function passiveToActive(sent) {
+  if (/[?!]/.test(sent)) return null;
+  const m = sent.match(
+    /^(.{2,60}?)\s+(was|were)\s+([a-z]+ed)\s+by\s+([^.!?,;:]{2,50}?)([.!?…]?)$/i,
+  );
+  if (!m) return null;
+  const [, subj, , ved, agent, punct] = m;
+  if (subj.includes(',') || agent.includes(',')) return null;
+  if (words(subj).length > 6 || words(agent).length > 6) return null;
+  // Otgan zamon: ved o'zgarmaydi — shakl mos keladi
+  return `${capWord(agent.trim())} ${ved} ${lowerIfDet(subj.trim())}${punct || '.'}`;
+}
+
+/** Adverbial frazalar (ochilish oldinga suriladigan). */
+const ADV_FRONTAL = [
+  'especially', 'typically', 'usually', 'generally', 'still', 'also',
+  'however', 'therefore', 'meanwhile', 'eventually', 'finally', 'first',
+  'next', 'later', 'often', 'sometimes', 'rarely', 'always', 'now',
+  'then', 'today', 'instead', 'indeed', 'fortunately', 'unfortunately',
+  'in practice', 'in theory', 'for example', 'for instance', 'in fact',
+  'after all', 'on the other hand', 'most importantly', 'most of the time',
+  'at first', 'in the end', 'by then', 'in turn',
 ];
 
-/** O\u2018zbekcha tabiiy discourse-markerlar. */
-const MARKERS_UZ = [
-  'Rostini aytsam,', 'Qarasangiz,', 'Xullas,', 'Aslida,', 'Qizigi shundaki,',
-  'Bunda shubha yoq,', 'Oddiy qilib aytganda,', 'Baribir,', 'Togrisi,',
-  'Xosh,', 'Qisqasi,',
-];
+function looksAdverbial(seg) {
+  const w = seg.trim().toLowerCase();
+  return ADV_FRONTAL.some((a) => w.startsWith(a + ' ') || w === a);
+}
+
+/**
+ * Qoida 1: ketma-ket gaplar bir xil so'z bilan boshlanmasligi uchun
+ * adverbialni oldinga surish. Mano saqlanadi, sintaksis qayta quriladi.
+ */
+function varyOpenings(sents, rnd) {
+  const out = sents.slice();
+  for (let i = 1; i < out.length; i += 1) {
+    const pw = out[i - 1].split(/\s+/)[0]?.toLowerCase().replace(/[^a-z']/g, '');
+    const cw = out[i].split(/\s+/)[0]?.toLowerCase().replace(/[^a-z']/g, '');
+    if (!pw || pw !== cw) continue;
+    if (rnd() > 0.7) continue;
+    const commaIdx = out[i].indexOf(', ');
+    if (commaIdx < 3) continue;
+    const head = out[i].slice(0, commaIdx);
+    const rest = out[i].slice(commaIdx + 2);
+    if (words(head).length < 4 || words(head).length > 14) continue;
+    const pm = rest.match(/^(.+?)([.!?…])$/);
+    const restBody = pm ? pm[1] : rest;
+    const punct = pm ? pm[2] : '.';
+    if (!looksAdverbial(restBody)) continue;
+    if (words(restBody).length < 1 || words(restBody).length > 8) continue;
+    out[i] = `${capWord(restBody)}, ${lowerIfDet(head)}${punct}`;
+  }
+  return out;
+}
 
 /** Rasmiy iboralarning norasmiy, jonli variantlari (qo\u2018shimcha formal→casual). */
 const FORMAL_TO_CASUAL = [
@@ -710,76 +861,74 @@ function swapSynonymsUz(sentence, rnd) {
   });
 }
 
-/** Gap boshiga tabiiy marker qo'shish (perplexity oshirish uchun). */
-function addDiscourseMarker(sentence, rnd, lang) {
-  const markers = lang === 'en' ? MARKERS_EN : MARKERS_UZ;
-  // Faqat 30% gapga marker qo'shamiz (aks holda juda ko'p bo'ladi)
-  if (rnd() > 0.3) return sentence;
-  const marker = markers[Math.floor(rnd() * markers.length)];
-  // Marker allaqachon bormi tekshirish
-  const alreadyHas = markers.some((m) => sentence.startsWith(m));
-  if (alreadyHas) return sentence;
-  // Gap juda qisqa bo'lmasin (>= 5 so'z)
-  if (sentence.split(/\s+/).length < 5) return sentence;
-  // Agar gap allaqachon boshqa bog'lovchi bilan boshlansa — qo'shmaymiz ("…is, also, research" kabi ikkilamchilik oldini olish)
-  const firstWord = sentence.split(/\s+/)[0].toLowerCase().replace(/[^a-z']/g, '');
-  const alreadyLinked = ['also', 'and', 'but', 'plus', 'however', 'moreover', 'furthermore',
-    'inconclusion', 'alsoand', 'thatsaid', 'funnythingis', 'honestly', 'look', 'also'].includes(firstWord);
-  if (alreadyLinked) return sentence;
-  return `${marker} ${sentence.charAt(0).toLowerCase()}${sentence.slice(1)}`;
-}
-
-/** Gap uzunliklarini qayta tartiblash — burstiness hosil qilish (qisqa→uzun→qisqa). */
 /**
- * Gap ichiga tabiiy intensifier/fokus qo'shish — haqiqiy yangi so'zlar kiradi,
- * shu bilan Jaccard distance haqiqatan oshadi (kafolat uchun).
+ * Qoida 3 + 1: haqiqiy struktura qayta qurish (filler qoshilmasdan):
+ * pasiv->faol, savol, ochilishlarini xilma-xilligi, ritm (birlashtirish/bo'lish).
+ *
+ * @param {string} text
+ * @param {() => number} rnd — deterministik RNG
+ * @param {'en'|'uz'|'ru'} lang
+ * @param {{question?: boolean}} opts — question: birinchi qisqa gapni savolga aylantirish
  */
-function amplifySentence(sentence, rnd, lang) {
-  const wordsArr = sentence.split(/\s+/);
-  if (wordsArr.length < 4) return sentence;
-  const amplifiers = lang === 'en'
-    ? ['honestly', 'in practice', 'for real', 'most of the time', 'the truth is']
-    : ['aslida', 'rostdan', 'aynan', "ko'pincha", "qizigi shundaki"];
-  const pick = amplifiers[Math.floor(rnd() * amplifiers.length)];
-  // Agar gap allaqachon boshlovchi bilan boshlansa (verguldan oldin qisqa clause) — qo'shmaymiz,
-  // aks holda "The truth is, in practice, ..." kabi ikkilamchilik paydo bo'ladi.
-  const firstClause = sentence.split(',')[0];
-  if (sentence.includes(',') && firstClause.split(/\s+/).length <= 5) return sentence;
-  // Gap boshiga intensifier qo'shish (50% ehtimol, juda ko'p bo'lmasligi uchun)
-  if (rnd() < 0.5 && !sentence.startsWith(pick)) {
-    return `${pick}, ${sentence.charAt(0).toLowerCase()}${sentence.slice(1)}`;
+function restructurePass(text, rnd, lang, { question = false } = {}) {
+  let sents = sentences(text);
+
+  // 1) Pasiv -> faol (inglizcha)
+  if (lang === 'en') {
+    sents = sents.map((s) => passiveToActive(s) || s);
   }
-  // Aks holda gap ichiga fokus qo'shish: fe'l oldiga intensifier
-  if (lang !== 'en' && wordsArr.length >= 5) {
-    const focusWords = ['tabiiyki', ' albatta', 'shubhasiz', ' ancha'];
-    const fw = focusWords[Math.floor(rnd() * focusWords.length)];
-    // Oxirgi fe'l oldiga qo'yishga urinish (so'nggi 3 so'zdan biri fe'l bo'lsa)
-    const idx = wordsArr.length - 2;
-    if (idx > 1 && rnd() < 0.4) {
-      wordsArr[idx] = `${fw.trim()} ${wordsArr[idx]}`;
-      return wordsArr.join(' ');
+
+  // 2) Rhetorical question (inglizcha, bir marta, qisqa gapdan)
+  if (lang === 'en' && question) {
+    const idx = sents.findIndex(
+      (s) => !/[?]$/.test(s) && !s.includes(',') && words(s).length >= 2 && words(s).length <= 11,
+    );
+    if (idx >= 0) {
+      const q = toQuestion(sents[idx]);
+      if (q) sents[idx] = q;
     }
   }
-  return sentence;
+
+  // 3) Ochilishlarini xilma-xilligi (rule 1)
+  sents = varyOpenings(sents, rnd);
+
+  // 4) Ritm: qisqa gaplarni birlashtirish / uzunlarni bo'lish (rule 1)
+  sents = burstifySentences(sents, rnd, lang);
+
+  let out = sents.join(' ');
+  out = out
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .trim();
+  return capitalizeAfterStops(out);
 }
 
-function burstifySentences(sents, rnd) {
+/**
+ * Ritm: qisqa gaplarni birlashtirish (grammatik bog'lovchi bilan) va
+ * uzun gaplarni bo'lish — qisqa↔uzun ketma-ketligi (burstiness, rule 1).
+ */
+function burstifySentences(sents, rnd, lang = 'en') {
   const lens = sents.map((s) => s.split(/\s+/).length);
-  const avg = lens.reduce((a, b) => a + b, 0) / lens.length;
+  const connector = lang === 'uz' ? (rnd() < 0.5 ? 'va' : 'ham') : 'and';
+  const lcHead = (s) => {
+    const [first, ...rest] = s.split(/\s+/);
+    return DET_HEADS.has(first.toLowerCase())
+      ? first.toLowerCase() + (rest.length ? ' ' + rest.join(' ') : '')
+      : s;
+  };
   const rebuilt = [];
   for (let i = 0; i < sents.length; i += 1) {
-    const words = lens[i];
-    // Juda qisqa gap (>3 so'z) va keyingisi ham qisqa bo'lsa — birlashtirish (grammatik vergul bilan)
-    if (words <= 3 && i + 1 < sents.length && lens[i + 1] <= 4 && rnd() < 0.4) {
+    const n = lens[i];
+    // Ikki qisqa gap ketma-ket bo'lsa — birlashtirish (", and"/", va" bilan)
+    if (n <= 7 && i + 1 < sents.length && lens[i + 1] <= 7 && rnd() < 0.55) {
       const left = sents[i].replace(/[.!?…]+$/, '');
       const right = sents[i + 1].replace(/^[.!?…]+\s*/, '');
-      const merged = `${left}, ${right.charAt(0).toLowerCase()}${right.slice(1)}`;
-      rebuilt.push(merged.trim());
+      rebuilt.push(`${left}, ${connector} ${lcHead(right)}`.trim());
       i += 1;
       continue;
     }
-    // Juda uzun gap (>28 so'z) bo'lsa — bo'lishga urinish
-    if (words > 28) {
+    // Uzun gap bo'lsa (>16 so'z) — bog'lovchidan ikkiga bo'lish (ritm uchun)
+    if (n > 16 && rnd() < 0.6) {
       const parts = splitLongSentence(sents[i]);
       if (parts) {
         rebuilt.push(parts[0], parts[1]);
@@ -804,9 +953,12 @@ function jaccardDiff(a, b) {
 /* ————————— Yangi agressiv humanize funksiyasi ————————— */
 
 /**
- * AI yozgan matnni tubdan qayta yozadi: katta sinonim leksikoni,
- * gap restrukturizatsiyasi (burstiness), tabiiy markerlar va
- * matematik kafolat (kamida 40-60% o'zgarish).
+ * AI yozgan matnni tubdan qayta yozadi (ruleset v4):
+ * 1) Burstiness — qisqa↔uzun gap ritmi va ochilishlarini xilma-xilligi;
+ * 2) Perplexity — qolip/buzzwordlarni olib tashlash + katta sinonim leksikoni;
+ * 3) Pasiv->faol, tabiiy qisqartmalar, rhetorical savollar;
+ * 4) Filler markerlar TAQIQLANGAN ("The thing is" kabi qoshimcha yo'q) —
+ *    faqat haqiqiy sintaksis qayta quriladi; matematik kafolat 40-60%.
  *
  * @param {string} input — qayta yoziladigan matn
  * @param {{intensity?: 'light'|'medium'|'strong'}} opts — kuch darajasi
@@ -896,9 +1048,9 @@ export function humanizeAggressive(input, { intensity = 'medium' } = {}) {
       if (count) changes.push({ from: phrase, to: pick, type: 'casual', count });
     }
 
-    // 6) Gap ajratish va per-sentence rewrite (perplexity + burstiness)
+    // 6) Per-sentence rewrite (perplexity): per-word sinonim almashuv
     const sents = sentences(out);
-    const rewritten = [];
+    let rewritten = [];
     for (let sent of sents) {
       if (!sent.trim()) continue;
       if (lang === 'en') {
@@ -906,13 +1058,34 @@ export function humanizeAggressive(input, { intensity = 'medium' } = {}) {
       } else if (lang === 'uz') {
         sent = swapSynonymsUz(sent, rnd);
       }
-      // ru tilida synonym swap yo'q (xavfsizlik uchun), faqat marker + burstiness
-      sent = addDiscourseMarker(sent, rnd, lang);
+      // ru tilida synonym swap yo'q (xavfsizlik uchun)
       rewritten.push(sent);
     }
 
-    // 7) Burstiness: uzunliklarni aralashtirish (qisqa↔uzun)
-    out = burstifySentences(rewritten, rnd).join(' ');
+    // 6b) Qoida 3: pasiv -> faol ovoz (inglizcha, "was V-ed by Y")
+    if (lang === 'en') {
+      rewritten = rewritten.map((s) => passiveToActive(s) || s);
+    }
+
+    // 6c) Qoida 1: ochilishlarini xilma-xilligi (ketma-ket bir xil boshlanishga qarshi)
+    rewritten = varyOpenings(rewritten, rnd);
+
+    // 6d) Qoida 3: birinchi passda qisqa gap tabiiy savolga aylantiriladi
+    if (pass === 1 && lang === 'en') {
+      const qi = rewritten.findIndex(
+        (s) => !/[?]$/.test(s) && !s.includes(',') && words(s).length >= 2 && words(s).length <= 11,
+      );
+      if (qi >= 0) {
+        const q = toQuestion(rewritten[qi]);
+        if (q) rewritten[qi] = q;
+      }
+    }
+
+    // 7) Burstiness: ritm — qisqa↔uzun, birlashtirish/bo'lish (rule 1)
+    out = burstifySentences(rewritten, rnd, lang).join(' ');
+    if (out !== sents.join(' ')) {
+      changes.push({ from: 'gap tuzilishi', to: 'qayta qurildi', type: 'rhythm', count: 1 });
+    }
 
     // 8) Tozalash
     out = out
@@ -934,23 +1107,20 @@ export function humanizeAggressive(input, { intensity = 'medium' } = {}) {
       break;
     }
 
-    // Agar o'zgarish bo'lmasa — amplify passni majburiy qo'llash (cheksiz sikl oldini olish uchun sanash)
+    // Agar o'zgarish bo'lmasa — sintaksisni haqiqiy qayta qurish (filler EMAS)
     if (out === prevOut) {
-      // Fallback: har bir gapga intensifier/fokus qo'shish (haqiqiy o'zgarish)
-      const fb = sentences(out).map((s) => amplifySentence(s, rnd, lang));
-      out = fb.join(' ');
-      out = capitalizeAfterStops(out.replace(/\s{2,}/g, ' ').trim());
+      out = restructurePass(out, rnd, lang, { question: pass === 1 });
       // Agar hali ham o'zgarmagan bo'lsa — to'xtatish (pass limitiga yetganmiz)
       if (out === prevOut) break;
     }
   }
 
-  // Loop tugagach, target oshilmagan bo'lsa — qo'shimcha amplify passlar (kafolat uchun)
+  // Loop tugagach, target oshilmagan bo'lsa — struktura qayta qurish passlari
+  // (filler qoshilmasdan: pasiv->faol, savol, ochilishlar, ritm)
   let extraPass = 0;
   while (jaccardDiff(source, out) < minChangeTarget && extraPass < 4) {
     extraPass += 1;
-    const fb = sentences(out).map((s) => amplifySentence(s, rnd, lang));
-    const next = capitalizeAfterStops(fb.join(' ').replace(/\s{2,}/g, ' ').trim());
+    const next = restructurePass(out, rnd, lang, { question: extraPass === 1 });
     if (next === out) break;
     out = next;
   }
